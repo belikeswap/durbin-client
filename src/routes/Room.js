@@ -42,7 +42,7 @@ const Room = (props) => {
   const roomID = props.match.params.roomID;
 
   useEffect(() => {
-    socketRef.current = io.connect("http://quipdf.quicloud.co.in:8000");
+    socketRef.current = io.connect("quipdf.quicloud.co.in:8000");
     navigator.mediaDevices
       .getUserMedia({ video: videoConstraints, audio: true })
       .then((stream) => {
