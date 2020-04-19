@@ -56,6 +56,8 @@ const Room = (props) => {
               peerID: userID,
               peer,
             });
+
+            peer.uniqueId = userID;
             peers.push(peer);
           });
           setPeers(peers);
@@ -68,6 +70,7 @@ const Room = (props) => {
             peer,
           });
 
+          peer.uniqueId = payload.callerID;
           setPeers((users) => [...users, peer]);
         });
 
@@ -132,7 +135,7 @@ const Room = (props) => {
     <Container>
       <StyledVideo muted ref={userVideo} autoPlay playsInline />
       {peers.map((peer, index) => {
-        return <Video key={index} peer={peer} />;
+        return <Video key={peer.uniqueId} peer={peer} />;
       })}
     </Container>
   );
