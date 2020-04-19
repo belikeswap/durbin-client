@@ -78,8 +78,9 @@ const Room = (props) => {
           item.peer.signal(payload.signal);
         });
 
-        socketRef.current.on("user left", (payload) => {
-          console.log(payload);
+        socketRef.current.on("user left", (discSocketId) => {
+          const item = peersRef.current.find((p) => p.peerID === discSocketId);
+          item.peer.destroy();
         });
       });
   }, [roomID]);
@@ -121,9 +122,11 @@ const Room = (props) => {
   return (
     <Container>
       <StyledVideo muted ref={userVideo} autoPlay playsInline />
-      {peers.map((peer, index) => {
-        return <Video key={index} peer={peer} />;
-      })}
+      {peers
+        .filter((p) => !p.destroyed)
+        .map((peer, index) => {
+          return <Video key={index} peer={peer} />;
+        })}
     </Container>
   );
 };
