@@ -95,6 +95,10 @@ const Room = (props) => {
       });
     });
 
+    peer.on("close", () => {
+      console.log(peer, "died");
+    });
+
     return peer;
   }
 
