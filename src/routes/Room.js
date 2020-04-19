@@ -42,7 +42,7 @@ const Room = (props) => {
   const roomID = props.match.params.roomID;
 
   useEffect(() => {
-    socketRef.current = io.connect("quipdf.quicloud.co.in:8000");
+    socketRef.current = io.connect("https://quipdf.quicloud.co.in:8000");
     navigator.mediaDevices
       .getUserMedia({ video: videoConstraints, audio: true })
       .then((stream) => {
@@ -56,10 +56,7 @@ const Room = (props) => {
               peerID: userID,
               peer,
             });
-            peers.push({
-              peerID: userID,
-              peer,
-            });
+            peers.push(peer);
           });
           setPeers(peers);
         });
@@ -71,13 +68,7 @@ const Room = (props) => {
             peer,
           });
 
-          setPeers((users) => [
-            ...users,
-            {
-              peerID: payload.callerID,
-              peer,
-            },
-          ]);
+          setPeers((users) => [...users, peer]);
         });
 
         socketRef.current.on("receiving returned signal", (payload) => {
@@ -88,10 +79,18 @@ const Room = (props) => {
         socketRef.current.on("user left", (discSocketId) => {
           const item = peersRef.current.find((p) => p.peerID === discSocketId);
           item.peer.destroy();
-          setPeers(peers.filter((p) => p.peerID !== discSocketId));
+          console.log(
+            peersRef.current,
+            peersRef.current.map((x, i) => ({ i, dest: x.peer.destroyed })),
+          );
+          setPeers(
+            peersRef.current
+              .filter((pref) => !pref.peer.destroyed)
+              .map((x) => x.peer),
+          );
         });
       });
-  }, [roomID, peers]);
+  }, [roomID]);
 
   function createPeer(userToSignal, callerID, stream) {
     const peer = new Peer({
@@ -127,11 +126,13 @@ const Room = (props) => {
     return peer;
   }
 
+  console.log(peers);
+
   return (
     <Container>
       <StyledVideo muted ref={userVideo} autoPlay playsInline />
-      {peers.map(({ peerID, peer }) => {
-        return <Video key={peerID} peer={peer} />;
+      {peers.map((peer, index) => {
+        return <Video key={index} peer={peer} />;
       })}
     </Container>
   );
